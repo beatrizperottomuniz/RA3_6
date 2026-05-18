@@ -4,6 +4,8 @@ Beatriz Perotto Muniz - @beatrizperottomuniz
 
 Nome do grupo no Canvas: RA2 6
 '''
+
+# TO-DO : erro lexico de comentario nao fechado   if globalVars.em_comentario_global: print("Erro léxico: comentário *{ não fechado") erro = True 
 import sys
 import os
 import json

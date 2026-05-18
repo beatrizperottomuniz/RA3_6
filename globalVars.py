@@ -9,3 +9,4 @@ from stringPool import StringPool
 string_pool_global = StringPool()
 contador_linha_global = 1
 total_linhas_global = 0
+em_comentario_global = False
