@@ -238,6 +238,25 @@ class Lexer:
             
         self.emit(TokenType.UNKNOWN)
         return self.estadoInicio
+    
+
+    # estado pra consumir comentarios
+    def estadoComentario(self):
+      char = self.peek()
+      if char is None:
+          # fim da linha = comentario = multi-linha
+          return None
+      if char == '}':
+          self.advance()# consome }
+          if self.peek() == '*':
+              self.advance()# consome *
+              globalVars.em_comentario_global = False
+              self.buffer.append("*{...}*") #placeholder (sera descartado de qualquer forma)
+              self.emit(TokenType.COMMENT)
+              return self.estadoInicio
+          return self.estadoComentario
+      self.advance()# consome qualquer char dentro do comentario
+      return self.estadoComentario
 
 
 # _tokens_ vem por referencia
