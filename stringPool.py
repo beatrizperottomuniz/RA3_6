@@ -2,7 +2,7 @@
 Integrantes do grupo (ordem alfabética):
 Beatriz Perotto Muniz - @beatrizperottomuniz
 
-Nome do grupo no Canvas: RA2 6
+Nome do grupo no Canvas: RA3 6
 '''
 # para ver se a string (variavel) ja esta na pool
 class StringPool:

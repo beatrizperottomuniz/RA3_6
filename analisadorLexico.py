@@ -2,7 +2,7 @@
 Integrantes do grupo (ordem alfabética):
 Beatriz Perotto Muniz - @beatrizperottomuniz
 
-Nome do grupo no Canvas: RA2 6
+Nome do grupo no Canvas: RA3 6
 '''
 from Token import Token, TokenType
 from stringPool import StringPool
@@ -19,15 +19,16 @@ class Lexer:
         self.tokens = []
 
         self.inicio_col = 1
-        self.estado_atual = self.estadoInicio
+        # adicionado pra suportar comentarios
+        if globalVars.em_comentario_global:
+            self.estado_atual = self.estadoComentario
+        else:
+            self.estado_atual = self.estadoInicio
         self.keywords = {
             "RES": TokenType.KEYWORD_RES,
             "START": TokenType.KEYWORD_START,
             "END": TokenType.KEYWORD_END,
             "IF": TokenType.KEYWORD_IF,
-            #"ELSE": TokenType.KEYWORD_ELSE,
-            # "THEN": TokenType.KEYWORD_THEN,
-            # "WHILE": TokenType.KEYWORD_WHILE,
             "FOR": TokenType.KEYWORD_FOR
         }
         self.operadores = "+-*/%^><=!|"
@@ -56,6 +57,10 @@ class Lexer:
 
     # salva token e limpa buffer
     def emit(self, token_type: str):
+        # do enunciado "tratar os comentários como tokens de tipo "comentário" e descartá-los durante a geração do vetor de tokens"
+        if token_type == TokenType.COMMENT:
+            self.buffer.clear()
+            return 
         lex_str = "".join(self.buffer)
         simbolo_id = 0
 
@@ -108,6 +113,13 @@ class Lexer:
             self.buffer.append(char)
             self.advance()
             return self.estadoNumInt
+        
+        # adicionado pra suportar comentarios
+        if char == '*' and self.pos + 1 < len(self.src) and self.src[self.pos + 1] == '{':
+            self.advance()  # consome *
+            self.advance()  # consome {
+            globalVars.em_comentario_global = True
+            return self.estadoComentario
 
         # transicao estado de operadores
         if char in self.operadores:
@@ -226,6 +238,25 @@ class Lexer:
             
         self.emit(TokenType.UNKNOWN)
         return self.estadoInicio
+    
+
+    # estado pra consumir comentarios
+    def estadoComentario(self):
+      char = self.peek()
+      if char is None:
+          # fim da linha = comentario = multi-linha
+          return None
+      if char == '}':
+          self.advance()# consome }
+          if self.peek() == '*':
+              self.advance()# consome *
+              globalVars.em_comentario_global = False
+              self.buffer.append("*{...}*") #placeholder (sera descartado de qualquer forma)
+              self.emit(TokenType.COMMENT)
+              return self.estadoInicio
+          return self.estadoComentario
+      self.advance()# consome qualquer char dentro do comentario
+      return self.estadoComentario
 
 
 # _tokens_ vem por referencia

@@ -2,7 +2,7 @@
 Integrantes do grupo (ordem alfabética):
 Beatriz Perotto Muniz - @beatrizperottomuniz
 
-Nome do grupo no Canvas: RA2 6
+Nome do grupo no Canvas: RA3 6
 '''
 import json
 from globalVars import string_pool_global

@@ -2,7 +2,7 @@
 Integrantes do grupo (ordem alfabética):
 Beatriz Perotto Muniz - @beatrizperottomuniz
 
-Nome do grupo no Canvas: RA2 6
+Nome do grupo no Canvas: RA3 6
 '''
 class TokenType:
     # keyword
@@ -10,9 +10,6 @@ class TokenType:
     KEYWORD_START = "KEYWORD_START"
     KEYWORD_END = "KEYWORD_END"
     KEYWORD_IF = "KEYWORD_IF"
-    # KEYWORD_ELSE = "KEYWORD_ELSE" 
-    # KEYWORD_THEN = "KEYWORD_THEN" 
-    # KEYWORD_WHILE = "KEYWORD_WHILE" 
     KEYWORD_FOR = "KEYWORD_FOR"
     # id (variaveis) e tipos literais
     ID = "ID"
@@ -39,6 +36,7 @@ class TokenType:
     # outros
     EOF = "EOF"
     UNKNOWN = "UNKNOWN"
+    COMMENT = "COMMENT"
 
 # classe do token com tipo,linha, coluna, id do simbolo na string pool
 class Token:
