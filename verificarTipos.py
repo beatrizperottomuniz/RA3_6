@@ -6,8 +6,6 @@ Nome do grupo no Canvas: RA3 6
 '''
 import globalVars
 
-arqv_erros = "saida_erros_semanticos.md"
-
 # aux
 
 def lexema(token):
@@ -380,36 +378,21 @@ def buscarListStmts(no):
     return None
 
 
-# relat
-
-def salvarErrosMD(erros, arquivo=arqv_erros):
-    linhas = ["# Relatório de Erros Semânticos\n"]
-    if erros:
-        for e in erros:
-            linhas.append(f"- {e}")
-    else:
-        linhas.append("Nenhum erro semântico encontrado.")
-    with open(arquivo, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(linhas))
-
-
 # func do aluno
 
 def verificarTipos(arvore, tabelaSimbolos):
     tabela    = tabelaSimbolos
     erros     = []
-    historico = []        # tipo de cada stmt processado
-    tipos_nos = {}        # id(no) -> tipo inferido
+    historico = []# tipo de cada stmt processado
+    tipos_nos = {}# id(no) -> tipo inferido
 
     if arvore is None:
         erros.append("Verificação de tipos não executada: árvore não disponível.")
-        salvarErrosMD(erros)
         return erros, tipos_nos
 
     list_stmts = buscarListStmts(arvore)
     if list_stmts:
         percorrerListStmts(list_stmts, tabela, historico, erros, tipos_nos)
 
-    salvarErrosMD(erros)
     return erros, tipos_nos
 
