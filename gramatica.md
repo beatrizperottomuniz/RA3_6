@@ -72,4 +72,4 @@ RPAREN = )
 EOF = sinaliza o fim do arquivo
 ```
 
-_Obs: Feita como pedido no tópico 27.7.1 : "Documentar a gramática completa em formato EBNF (use letras minúsculas para não-terminais e maiúsculas para terminais)."_
+_Obs: Feita como pedido no tópico 27.7.1 da Fase 2 : "Documentar a gramática completa em formato EBNF (use letras minúsculas para não-terminais e maiúsculas para terminais)."_
