@@ -42,11 +42,13 @@ def lerArvore(arquivo=arqv_json):
 
     return dictParaNo(dados['arvore'])
 
+
 def prepararEntradaSemantica(arquivo):
     print(f"\n----- Analisando arquivo: {arquivo} -----")
 
     # lexico
     erro_lexico = not rodarLexico(arquivo)
+    globalVars.erro_lexico_global = erro_lexico
 
     # erro de comentario nao fechado
     if globalVars.em_comentario_global:
@@ -70,6 +72,7 @@ def prepararEntradaSemantica(arquivo):
     resultado_parser = parsear(tokens, tabela)
 
     erros_sintaticos = resultado_parser['erros']
+    globalVars.erros_sintaticos_global = erros_sintaticos
     if erros_sintaticos:
         print("\n------ Erros sintáticos ------")
         for erro in erros_sintaticos:
@@ -79,7 +82,7 @@ def prepararEntradaSemantica(arquivo):
     else:
         print("Resultado da análise sintática: OK")
 
-    # arvore sintatica -> gerada se o sintatico passar independente de erro lexico
+    # arvore sintatica -> gerada se o sintatico passar, independente de erro lexico
     arvore = None
     estrutura = resultado_parser['estrutura_derivacao']
     if estrutura:
