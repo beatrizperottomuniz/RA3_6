@@ -71,7 +71,7 @@ class TabelaSimbolos:
     def salvarMD(self, arquivo=arqv_tabela_md):
         linhas = [
             "# Tabela de Símbolos\n",
-            "| Nome | Tipo | Linha Definição | Linhas de Uso |",
+            "| Nome | Tipo | Linha definição | Linhas de uso |",
             "|------|------|-----------------|---------------|"
         ]
         for nome, s in sorted(self.tabela.items()):
