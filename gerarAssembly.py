@@ -36,7 +36,7 @@ def lexemaTerminal(no):
     return string_pool_global.obterString(t.simbolo_id)
 
 
-def encontrarTerminal(no): # procura o filho -> o terminal (token)
+def encontrarTerminal(no):
     if no.token is not None:
         return no
     for filho in no.filhos:
@@ -57,9 +57,9 @@ def pushConst(asm, val_str):
     return val
 
 
-# ops arit
+# ops aritm
+
 def gerarOpArit(tipo, asm):
-    # desempilhar operandos (d1 = direita, d0 = esquerda)
     asm.append(f"    VLDMIA sp!, {{d1}}")
     asm.append(f"    VLDMIA sp!, {{d0}}")
 
@@ -102,7 +102,8 @@ def gerarOpArit(tipo, asm):
     asm.append("    VSTMDB sp!, {d0}")
 
 
-# ops relacionais  (produzem 1.0 ou 0.0)
+# ops rel
+
 def gerarOpRel(tipo, asm):
     asm.append(f"    VLDMIA sp!, {{d1}}")
     asm.append(f"    VLDMIA sp!, {{d0}}")
@@ -127,7 +128,8 @@ def gerarOpBinTerminal(tipo, asm):
         gerarOpRel(tipo, asm)
 
 
-# novas
+# estrut controle
+
 def gerarIf(corpo_no, asm):
     lbl_falso = novoLabel('IF_FALSE')
     lbl_fim   = novoLabel('IF_FIM')
@@ -138,12 +140,12 @@ def gerarIf(corpo_no, asm):
     asm.append(f"    BEQ {lbl_falso}")
 
     gerarStmt(corpo_no, asm)
+    asm.append(f"    VLDMIA sp!, {{d0}}")  # descarta resultado do corpo
     asm.append(f"    B {lbl_fim}")
 
     asm.append(f"{lbl_falso}:")
-    pushConst(asm, "0.0")
-
     asm.append(f"{lbl_fim}:")
+    pushConst(asm, "0.0")# julgamento ok — empilha 0
 
 
 def gerarFor(corpo_no, asm):
@@ -170,7 +172,7 @@ def gerarFor(corpo_no, asm):
     asm.append(f"    BLE {lbl_fim}")
 
     gerarStmt(corpo_no, asm)
-    asm.append(f"    VLDMIA sp!, {{d3}}")
+    asm.append(f"    VLDMIA sp!, {{d0}}")  # descarta resultado do corpo
 
     asm.append(f"    LDR r1, ={lbl_ctr}")
     asm.append(f"    LDR r2, [r1]")
@@ -179,12 +181,14 @@ def gerarFor(corpo_no, asm):
     asm.append(f"    B {lbl_loop}")
 
     asm.append(f"{lbl_fim}:")
-    asm.append(f"    VSTMDB sp!, {{d3}}")
+    pushConst(asm, "0.0")# julgamento ok
 
 
 def gerarStmt(no, asm):
     gerarRpn(no.filhos[1], asm)
 
+
+# lit num
 
 def gerarNum(no, asm):
     filho0 = no.filhos[0]
@@ -206,7 +210,6 @@ def gerarRpnTailNum(no, asm, ultimo_num):
         linha_atual = len(resultados_linha) + 1
         indice      = (linha_atual - 1) - n
         asm.append(f"    ADD sp, sp, #8")
-        # n=0 ou indice invalido: retorna 0.0
         if n == 0 or indice < 0 or indice >= len(resultados_linha):
             pushConst(asm, "0.0")
         else:
@@ -218,7 +221,6 @@ def gerarRpnTailNum(no, asm, ultimo_num):
     elif filho0.tipo == 'ID':
         lex = lexemaTerminal(filho0)
         variaveis.add(lex)
-        # store
         asm.append(f"    VLDMIA sp!, {{d0}}")
         asm.append(f"    LDR r1, ={lex}_MEM")
         asm.append(f"    VSTR d0, [r1]")
@@ -245,7 +247,6 @@ def gerarRpnTailStmt(no, asm):
     if filho0.tipo == 'ID':
         lex = lexemaTerminal(filho0)
         variaveis.add(lex)
-        # store
         asm.append(f"    VLDMIA sp!, {{d0}}")
         asm.append(f"    LDR r1, ={lex}_MEM")
         asm.append(f"    VSTR d0, [r1]")
@@ -256,7 +257,7 @@ def gerarRpnTailStmt(no, asm):
         terminal = encontrarTerminal(no.filhos[1])
         gerarOpBinTerminal(terminal.tipo, asm)
 
-    else:  # stmt
+    else:
         op_terminal = encontrarTerminal(no.filhos[1])
         tipo_op     = op_terminal.tipo if op_terminal else None
         if tipo_op == 'KEYWORD_IF':
@@ -277,10 +278,9 @@ def gerarRpn(no, asm):
         gerarStmt(filho0, asm)
         gerarRpnTailStmt(no.filhos[1], asm)
 
-    else:  # rpn -> ID
+    else:
         lex = lexemaTerminal(filho0)
         variaveis.add(lex)
-        # load -> carrega p/ pilha
         asm.append(f"    LDR r0, ={lex}_MEM")
         asm.append(f"    VLDR d0, [r0]")
         asm.append(f"    VSTMDB sp!, {{d0}}")
@@ -291,9 +291,19 @@ def gerarListItem(no, asm):
         return
 
     linha_atual = len(resultados_linha) + 1
-    asm.append(f"\n    @ linha {linha_atual} --------")
+    no_rpn      = no.filhos[0]
+    categoria   = getattr(no_rpn, 'categoria_semantica', None)
+    tipo_inf    = getattr(no_rpn, 'tipo_inferido', None)
 
-    gerarRpn(no.filhos[0], asm)
+    comentario = f"\n    @ linha {linha_atual}"
+    if categoria:
+        comentario += f"  [{categoria}]"
+    if tipo_inf:
+        comentario += f"  : {tipo_inf}"
+    comentario += "  --------"
+    asm.append(comentario)
+
+    gerarRpn(no_rpn, asm)
 
     lbl_linha = f"RES_LINHA_{linha_atual}"
     resultados_linha.append(lbl_linha)
@@ -311,6 +321,8 @@ def gerarListStmts(no, asm):
     gerarListItem(no.filhos[1], asm)
 
 
+# fim arquivo
+
 def finalizarAssembly(codigo, arquivo):
     out = [
         "    .syntax unified",
@@ -320,7 +332,6 @@ def finalizarAssembly(codigo, arquivo):
         "    .data"
     ]
 
-    # vars 8 bytes
     for v in variaveis:
         out.append(f"{v}_MEM: .space 8")
     for res in resultados_linha:
@@ -328,7 +339,6 @@ def finalizarAssembly(codigo, arquivo):
     for ctr in for_ctrs:
         out.append(f"{ctr}: .space 4")
 
-    # consts
     for val, lbl in constantes.items():
         wb, wa = doubleParaBits(val)
         out.append(f"{lbl}: .word 0x{wb:08X}, 0x{wa:08X} @ valor: {val}")
@@ -407,17 +417,16 @@ def finalizarAssembly(codigo, arquivo):
         f.write(texto_final)
 
 
-# func principal -----------------------
+# func aluno
 
-def gerarAssembly(arvore):
-    arquivo = "saida2.s"
+def gerarAssembly(arvoreAtribuida):
+    arquivo = "saida_assembly.s"
     global constantes, variaveis, resultados_linha, for_ctrs, contador_label
 
-    if arvore is None:
-        print("[gerarAssembly] árvore vazia — nenhum arquivo gerado.")
-        return
+    if arvoreAtribuida is None:
+        print("[gerarAssembly] árvore não disponível — Assembly não gerado.")
+        return None
 
-    # reinicia estado global a cada chamada
     constantes       = {}
     variaveis        = set()
     resultados_linha = []
@@ -426,9 +435,10 @@ def gerarAssembly(arvore):
 
     asm = []
 
-    list_stmts_no = next((f for f in arvore.filhos if f.tipo == 'list_stmts'), None)
+    list_stmts_no = next((f for f in arvoreAtribuida.filhos if f.tipo == 'list_stmts'), None)
     if list_stmts_no:
         gerarListStmts(list_stmts_no, asm)
 
     finalizarAssembly(asm, arquivo)
-    print(f"Assembly gerado em '{arquivo}'")
+    print(f"[gerarAssembly] Assembly gerado em '{arquivo}'")
+    return arquivo
