@@ -440,5 +440,5 @@ def gerarAssembly(arvoreAtribuida):
         gerarListStmts(list_stmts_no, asm)
 
     finalizarAssembly(asm, arquivo)
-    print(f"[gerarAssembly] Assembly gerado em '{arquivo}'")
+    #print(f"[gerarAssembly] Assembly gerado em '{arquivo}'")
     return arquivo

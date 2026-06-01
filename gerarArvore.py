@@ -110,7 +110,7 @@ def salvarArvoreTXT(raiz, arquivo=arqv_txt):
         linhasArvores(filho, '', i == len(raiz.filhos) - 1, linhas)
 
     texto = '\n'.join(linhas)
-    print(texto)
+    #print(texto)
     with open(arquivo, 'w', encoding='utf-8') as f:
         f.write(texto)
 
