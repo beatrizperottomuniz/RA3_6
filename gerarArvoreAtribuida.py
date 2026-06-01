@@ -113,7 +113,7 @@ def noParaDictAtribuido(no, tabela, tipos_nos):
             'tipo':   no.token.tipo,
             'linha':  no.token.linha,
             'coluna': no.token.coluna,
-            'lexema': lex
+            'simbolo_id': no.token.simbolo_id
         }
         # se for ID anexa entrada da tab simb
         if no.tipo == 'ID' and lex and tabela:
@@ -129,8 +129,12 @@ def noParaDictAtribuido(no, tabela, tipos_nos):
 
 
 def salvarAtribuidaJSON(dados, arquivo=arqv_atrib_json):
+    output = {
+        'string_pool': string_pool_global.strings,
+        'arvore': dados
+    }
     with open(arquivo, 'w', encoding='utf-8') as f:
-        json.dump(dados, f, ensure_ascii=False, indent=4)
+        json.dump(output, f, ensure_ascii=False, indent=4)
 
 
 # txt
