@@ -128,7 +128,7 @@ class Interpretador:
                 for _ in range(n):
                     sub = Interpretador(corpo, self.resultados, self.memoria)
                     resultado = sub.avaliarStmt()
-                return resultado
+                return 0.0
 
             segundo = self.avaliarStmt()
             op = self.consumir()
@@ -163,7 +163,7 @@ class Interpretador:
                 if condicao != 0.0:
                     corpo = self.avaliarStmt()
                     self.consumir()                    # IF
-                    return corpo
+                    return 0.0
                 else:
                     self.pularStmt()
                     self.consumir()                    # IF
