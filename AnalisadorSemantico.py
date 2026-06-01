@@ -1,6 +1,6 @@
 '''
 Integrantes do grupo (ordem alfabética):
-Beatriz Perotto Muniz - @beatrizperettomuniz
+Beatriz Perotto Muniz - @beatrizperottomuniz
 
 Nome do grupo no Canvas: RA3 6
 '''
