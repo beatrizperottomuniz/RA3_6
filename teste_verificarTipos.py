@@ -7,6 +7,7 @@ Nome do grupo no Canvas: RA3 6
 import unittest
 import os
 import tempfile
+import globalVars
 from AnalisadorSintatico import arquivo_tokens
 from gerarArvore import arqv_json, arqv_txt, arqv_png, arqv_md
 from prepararEntradaSemantica import prepararEntradaSemantica
@@ -45,6 +46,13 @@ class _BaseComBackup(unittest.TestCase):
                 f.write(self._backup_png)
         elif os.path.exists(arqv_png):
             os.remove(arqv_png)
+        globalVars.string_pool_global.pool.clear()
+        globalVars.string_pool_global.strings.clear()
+        globalVars.contador_linha_global   = 1
+        globalVars.total_linhas_global     = 0
+        globalVars.em_comentario_global    = False
+        globalVars.erro_lexico_global      = False
+        globalVars.erros_sintaticos_global = []
 
 
 def analisar(linhas):

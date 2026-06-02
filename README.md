@@ -277,6 +277,50 @@ Erro: expoente em `^` deve ser `int`, recebeu `float`.
 
 ---
 
+## Tabela de Símbolos
+
+A tabela de símbolos é construída pelo módulo `construirTabelaSimbolos.py` durante a análise semântica. Ela registra todas as variáveis declaradas no programa e é usada por `verificarTipos.py` para validar os tipos das expressões.
+
+Cada entrada na tabela contém:
+
+| Campo | Descrição |
+|---|---|
+| `nome` | Nome da variável (ex: `X`, `CONTADOR`) |
+| `tipo` | Tipo inferido no momento da declaração: `'int'`, `'float'` ou `'bool'` |
+| `linha_def` | Número da linha onde a variável foi declarada com `(V MEM)` |
+| `linhas_uso` | Lista de linhas onde a variável foi lida com `(MEM)` ou reatribuída |
+
+Regras relevantes:
+- Uma variável só pode ser usada após ter sido declarada — uso antes da declaração gera erro semântico.
+- O tipo é fixado na declaração e não pode ser alterado — reatribuição com tipo diferente gera erro semântico.
+- Reatribuição com mesmo tipo é válida e registra a linha como uso.
+
+A tabela é salva em `saida_tabela_simbolos.json` (formato JSON) e `saida_tabela_simbolos.md` (formato Markdown).
+
+---
+
+## Árvore Sintática Atribuída
+
+A árvore sintática atribuída é a árvore sintática da Fase 2 enriquecida com informações semânticas. É gerada por `gerarArvoreAtribuida.py` apenas quando não há erros léxicos, sintáticos ou semânticos.
+
+Cada nó relevante da árvore contém, além dos campos da Fase 2 (`tipo`, `token`, `filhos`), os seguintes campos adicionais:
+
+| Campo | Descrição |
+|---|---|
+| `tipo_inferido` | Tipo semântico do resultado do nó|
+| `categoria_semantica` | Categoria do nó: `'literal'`, `'variavel'`, `'op_arit'`, `'op_rel'`, `'atribuicao'`, `'leitura'`, `'res'`, `'if'`, `'for'` |
+| `simbolo` | Lexema do token (ex: `"+"`, `"3.14"`, `"X"`) para nós terminais relevantes |
+
+O campo `tipo_inferido` é o principal artefato semântico: permite rastrear o tipo de cada subexpressão e justifica a geração do código Assembly correspondente.
+
+A árvore atribuída é salva em:
+- `saida_arvore_atribuida.json` — formato JSON com `string_pool` e nós anotados
+- `saida_arvore_atribuida.txt` — representação em texto indentado
+- `saida_arvore_atribuida.md` — representação em Markdown
+- `saida_arvore_atribuida.png` — visualização gráfica (requer `matplotlib`)
+
+---
+
 ## Arquivos de saída
 
 | Arquivo | Conteúdo |
