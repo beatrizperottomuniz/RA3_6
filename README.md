@@ -315,7 +315,7 @@ Cada nó relevante da árvore contém, além dos campos da Fase 2 (`tipo`, `toke
 | Campo | Descrição |
 |---|---|
 | `tipo_inferido` | Tipo semântico do resultado do nó|
-| `categoria_semantica` | Categoria do nó: `'literal'`, `'variavel'`, `'op_arit'`, `'op_rel'`, `'atribuicao'`, `'leitura'`, `'res'`, `'if'`, `'for'` |
+| `categoria_semantica` | Categoria do nó: `'expressao_aritmetica'`, `'expressao_relacional'`, `'atribuicao'`, `'leitura'`, `'recuperacao_resultado'`, `'decisao'`, `'repeticao'`, `'subexpressao'` |
 | `simbolo` | Lexema do token (ex: `"+"`, `"3.14"`, `"X"`) para nós terminais relevantes |
 
 O campo `tipo_inferido` é o principal artefato semântico: permite rastrear o tipo de cada subexpressão e justifica a geração do código Assembly correspondente.
