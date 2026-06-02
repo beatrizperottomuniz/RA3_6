@@ -24,7 +24,7 @@ class TokenType:
     MOD = "MOD"
     POW = "POW"
     #operadores para comparacao
-    GT  = "GT"  # >                                                                                                         
+    GT  = "GT"  # >
     LT  = "LT"  # <
     GTE = "GTE"  # >=
     LTE = "LTE"  # <=

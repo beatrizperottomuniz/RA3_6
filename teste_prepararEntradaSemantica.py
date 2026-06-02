@@ -8,6 +8,7 @@ import unittest
 import os
 import json
 import globalVars
+from stringPool import StringPool
 from Token import TokenType
 from analisadorLexico import parseExpressao
 from leTokens import lerTokens
@@ -60,7 +61,7 @@ def tokenizar(linhas_codigo):
 
 
 def analisar(linhas_codigo):
-    # roda lexico e parser retorna (erro_lexico, erros_sintaticos)
+    # roda lexico + parser. retorna (erro_lexico, erros_sintaticos)
     _, tem_erro_lexico, _ = tokenizar(linhas_codigo)
     resetar()
     tokens = lerTokens(arquivo_tks_temp)
@@ -69,6 +70,7 @@ def analisar(linhas_codigo):
 
 
 def programa(expressoes):
+    # expressoes + (START)...(END)
     return ["(START)"] + expressoes + ["(END)"]
 
 
@@ -80,14 +82,12 @@ class TestComentariosValidos(unittest.TestCase):
         resetar()
 
     def test_comentario_linha_inteira(self):
-        # linha inteira é comentario, nao deve gerar tokens nem erro (exceto EOF)
         tokens, tem_erro, _ = tokenizar(["*{ isso é um comentário inteiro }*"])
         self.assertFalse(tem_erro)
         tokens_sem_eof = [t for t in tokens if t.tipo != TokenType.EOF]
         self.assertEqual(len(tokens_sem_eof), 0)
 
     def test_comentario_fim_de_linha(self):
-        # comentario no final da linha nao interfere na expressao
         tokens, tem_erro, _ = tokenizar(["(3 4 +) *{ soma }*"])
         self.assertFalse(tem_erro)
         tipos = [t.tipo for t in tokens]
@@ -96,7 +96,6 @@ class TestComentariosValidos(unittest.TestCase):
         self.assertNotIn(TokenType.COMMENT, tipos)
 
     def test_comentario_entre_expressoes(self):
-        # comentario entre duas expressoes validas
         erro_lex, erro_sin = analisar(programa([
             "(3 4 +)",
             "*{ comentário entre expressões }*",
@@ -106,7 +105,6 @@ class TestComentariosValidos(unittest.TestCase):
         self.assertEqual(erro_sin, [])
 
     def test_comentario_multilinhas(self):
-        # comentario que abre numa linha e fecha em outra
         erro_lex, erro_sin = analisar(programa([
             "(3 4 +) *{ abre aqui",
             "ainda comentario",
@@ -116,7 +114,6 @@ class TestComentariosValidos(unittest.TestCase):
         self.assertEqual(erro_sin, [])
 
     def test_multiplos_comentarios(self):
-        # varios comentarios na mesma expressao
         erro_lex, erro_sin = analisar(programa([
             "*{ primeiro }* (3 4 +) *{ segundo }*"
         ]))
@@ -128,6 +125,11 @@ class TestComentariosValidos(unittest.TestCase):
         tokens, tem_erro, _ = tokenizar(["*{ abre *{ outro }*"])
         self.assertFalse(tem_erro)
 
+    def test_tokens_nao_gerados_para_comentario(self):
+        tokens, _, _ = tokenizar(["*{ qualquer coisa }*"])
+        tokens_sem_eof = [t for t in tokens if t.tipo != TokenType.EOF]
+        self.assertEqual(len(tokens_sem_eof), 0)
+
 
 class TestTokensInvalidos(unittest.TestCase):
 
@@ -137,13 +139,11 @@ class TestTokensInvalidos(unittest.TestCase):
         resetar()
 
     def test_caractere_desconhecido(self):
-        # @ nao existe na linguagem deve gerar UNKNOWN e erro lexico
         tokens, tem_erro, _ = tokenizar(["(3 @ 4 +)"])
         self.assertTrue(tem_erro)
         self.assertTrue(any(t.tipo == TokenType.UNKNOWN for t in tokens))
 
     def test_caractere_desconhecido_nao_interfere_nos_outros_tokens(self):
-        # os tokens validos ao redor do invalido ainda devem aparecer
         tokens, tem_erro, _ = tokenizar(["(3 @ 4 +)"])
         self.assertTrue(tem_erro)
         tipos = [t.tipo for t in tokens]
@@ -198,7 +198,6 @@ class TestIntegracaoComComentarios(unittest.TestCase):
         resetar()
 
     def test_programa_valido_com_comentarios(self):
-        # programa completo com comentarios em varios lugares
         erro_lex, erro_sin = analisar([
             "*{ programa de teste }*",
             "(START)",
@@ -222,39 +221,52 @@ class TestIntegracaoComComentarios(unittest.TestCase):
         self.assertEqual(tipos_sem, tipos_com)
 
     def test_programa_valido_retorna_sem_erros(self):
-        # prepararEntradaSemantica retorna erro_lexico=False e erros_sintaticos=[]
         erro_lex, erro_sin = analisar(programa([
             "*{ comentario }*",
             "(5 3 +)",
-            "(1 RES)"
+            "(2 RES)"
         ]))
         self.assertFalse(erro_lex)
         self.assertEqual(erro_sin, [])
 
+    def test_expressao_vazia_gera_erro_sintatico(self):                                                                             
+        erro_lex, erro_sin = analisar(programa([                           
+            "()"                                                           
+        ]))                                        
+        self.assertFalse(erro_lex)                                         
+        self.assertTrue(len(erro_sin) > 0)    
+
 
 class TestArvoreJSON(unittest.TestCase):
 
+    arquivos_texto = [arquivo_tks_temp, arqv_json, arqv_txt, arqv_md]
+
     def setUp(self):
-        # guarda conteudo do json real em memoria para restaurar depois
-        self._json_real = None
-        if os.path.exists(arqv_json):
-            with open(arqv_json, 'r', encoding='utf-8') as f:
-                self._json_real = f.read()
+        self._backups_texto = {}
+        self._backup_png = None
+        for arq in self.arquivos_texto:
+            if os.path.exists(arq):
+                with open(arq, 'r', encoding='utf-8') as f:
+                    self._backups_texto[arq] = f.read()
+        if os.path.exists(arqv_png):
+            with open(arqv_png, 'rb') as f:
+                self._backup_png = f.read()
 
     def tearDown(self):
-        for f in [arquivo_tks_temp, arqv_txt, arqv_png, arqv_md]:
-            if os.path.exists(f):
-                os.remove(f)
-        # restaura o json real ou remove se nao existia antes
-        if self._json_real is not None:
-            with open(arqv_json, 'w', encoding='utf-8') as f:
-                f.write(self._json_real)
-        elif os.path.exists(arqv_json):
-            os.remove(arqv_json)
+        for arq in self.arquivos_texto:
+            if arq in self._backups_texto:
+                with open(arq, 'w', encoding='utf-8') as f:
+                    f.write(self._backups_texto[arq])
+            elif os.path.exists(arq):
+                os.remove(arq)
+        if self._backup_png is not None:
+            with open(arqv_png, 'wb') as f:
+                f.write(self._backup_png)
+        elif os.path.exists(arqv_png):
+            os.remove(arqv_png)
         resetar()
 
     def test_arvore_gerada_igual_arvore_lida(self):
-        # gera a arvore em memoria, salva em json via gerarArvore, renomeia pra temp pra nao sujar o arquivo real, le de volta via lerArvore e compara
         linhas = programa(["(3 4 +)", "(5 2 -)"])
         tokenizar(linhas)
         resetar()
@@ -268,6 +280,7 @@ class TestArvoreJSON(unittest.TestCase):
 
         self.assertIsNotNone(arvore_lida)
         self.assertEqual(noParaDict(arvore_gerada), noParaDict(arvore_lida))
+
 
 
 if __name__ == '__main__':
