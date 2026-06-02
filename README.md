@@ -5,102 +5,304 @@
 **Professor** : Frank Coelho de Alcantara<br>
 **Aluna** : Beatriz Perotto Muniz [@beatrizperottomuniz](https://github.com/beatrizperottomuniz)<br>
 
-### Descrição
-Este projeto implementa um analisador semântico capaz de identificar tokens, fazer análise sintática e semântica, e gerar código assembly correspondente.
+---
 
-### Requisitos 
-Python 3.x instalado <br>
-Verificar versão:
+## Descrição
+
+Este projeto implementa um analisador semântico capaz de identificar tokens, fazer análise sintática e semântica, e gerar código assembly correspondente.
+---
+
+## Requisitos
+
+Python 3.x instalado:
 ```
 python3 --version
 ```
-Matplotlib <br>
+
+Matplotlib (para geração das árvores em PNG):
 ```
 pip install matplotlib
 ```
 
-### Como compilar 
-Este projeto foi desenvolvido em Python, uma linguagem interpretada, portanto não há etapa de compilação explícita. <br>
-A execução é feita diretamente pelo interpretador Python.<br>
+---
 
-### Como executar
-Após clonar o diretório, rode o comando <br>
+## Como executar
+
 ```
-python3 AnalisadorSintatico.py nome_do_seu_arquivo.txt
+python3 AnalisadorSemantico.py nome_do_arquivo.txt
 ```
-Onde:
-* `AnalisadorSintatico.py` é o arquivo principal do projeto
-* `nome_do_seu_arquivo.txt` contém as expressões a serem analisadas. O arquivo deverá estar em formato txt, contendo apenas operações suportadas. Para criar seu próprio arquivo, utilize `teste01.txt` como exemplo (lembrando que é necessário o uso de (START) e (END) para demarcar início e fim, como pode ser visto no arquivo).<br>
 
-_Observação:_
-Dependendo da configuração do sistema operacional, o comando `python` pode estar vinculado ao Python 3. Nesse caso, o comando `python3` pode ser substituído por `python`. <br>
+O programa executa as três fases em sequência e exibe no terminal:
+- Resultado da análise léxica
+- Resultado da análise sintática
+- Resultado da análise semântica
+- Lista de erros encontrados (se houver)
+- Caminhos dos arquivos de saída gerados
 
-### Como testar
-#### Rodando com programas de teste fornecidos
-1. Após clonar o diretório, rode o comando
+O assembly (`saida_assembly.s`) só é gerado se não houver nenhum erro léxico, sintático ou semântico.
+
+_Obs: dependendo do sistema, `python3` pode ser substituído por `python`._
+
+---
+
+## Como testar
+
+### Com os arquivos de teste fornecidos
+
 ```
-python3 AnalisadorSintatico.py teste01.txt
+python3 AnalisadorSemantico.py teste01.txt
+python3 AnalisadorSemantico.py teste02.txt
+python3 AnalisadorSemantico.py teste03.txt
 ```
-*Também estão disponiveis os arquivos teste02.txt, teste03.txt, teste01_erros.txt, teste02_erros.txt, teste03_erros.txt* <br>
 
-2. O arquivo `saida2.s` será gerado automaticamente, com código assembly.<br>
-3. Copie seu conteúdo e cole no simulador Cpulator-ARMv7 DEC1-SOC(v16.1). <br>
-4. Clique em "Compile and Load", espere a interface exibir a mensagem de "Compile succeeded" em Messages. <br>
-5. OPCIONAL : Em "Settings" mude "Format" para "Decimal signed" se quiser ver as operações realizadas em tempo real.<br>
-6. OPCIONAL : Use "Step Over" para ver as instruções sendo executadas passo a passo (visualize em d0 os resultados das operações).<br>
-7. Clique em "Continue" e verifique na JTAG UART os resultados em hexadecimal. Verifique se os resultados estão corretos visualizando (no terminal em que o comando do passo 1 foi rodado) os valores esperados para as operações. <br>
+Os arquivos `teste01_erros.txt`, `teste02_erros.txt` e `teste03_erros.txt` contêm erros intencionais (léxicos, sintáticos e semânticos) para validar o tratamento de erros.
 
-#### Rodando funções de testes 
+Para usar o assembly gerado:
+1. Abra o arquivo `saida_assembly.s` gerado
+2. Copie o conteúdo e cole no simulador [Cpulator-ARMv7 DEC1-SOC(v16.1)](https://cpulator.01xz.net/?sys=arm-de1soc)
+3. Clique em **Compile and Load** e aguarde "Compile succeeded" em Messages
+4. Clique em **Continue** e verifique os resultados na JTAG UART
+5. Opcional: em Settings mude Format para "Decimal signed" para visualizar os valores em tempo real
+6. Opcional: use **Step Over** para executar instrução por instrução (resultados visíveis em `d0`)
+
+### Com as funções de teste unitário
+
 ```
 python3 teste_analisadorSintatico.py
-python3 teste_end_to_end.py
+python3 teste_construirTabelaSimbolos.py
+python3 teste_end_to_end_fase3.py
+python3 teste_gerarArvoreAtribuida.py
+python3 teste_gerarAssemblyFase3.py
 python3 teste_parsear.py
+python3 teste_prepararEntradaSemantica.py
+python3 teste_verificarTipos.py
 ```
-_Obs : acesse os arquivos para verificação de detalhes dos testes_ <br>
 
-### Como depurar 
-#### Verificar tokens gerados pelo léxico                                                              
-Após executar, o arquivo `saida_tokens_2.txt` contém todos os tokens reconhecidos em formato JSON. Abra-o para verificar se o léxico está tokenizando corretamente.
+---
 
-#### Verificar a árvore sintática
-Após execução sem erros, os arquivos gerados (entre outros) são:
-- `saida_arvore.txt` — árvore em formato texto
-- `saida_arvore_json.txt` — árvore em formato JSON
+## Como depurar
 
-#### Verificar erros
-Erros léxicos e sintáticos são impressos diretamente no terminal com número de linha e coluna.
+### Tokens gerados pelo léxico
+O arquivo `saida_tokens_2.txt` contém todos os tokens reconhecidos em formato JSON, incluindo tipo, linha, coluna e índice na string pool.
 
-### Novas estruturas
-**Para a presente documentação , consideraremos :** <br>
-`stmt` = qualquer instrução completa entre parênteses <br>
+### Árvore sintática
+Gerada em quatro formatos após execução sem erros:
+- `saida_arvore_json.txt` — JSON com string pool e `simbolo_id` por token
+- `saida_arvore.txt` — texto com estrutura em árvore
+- `saida_arvore.md` — Markdown
+- `saida_arvore.png` — imagem
 
-**Expressões com operadores relacionais**
+### Árvore sintática atribuída
+Gerada após análise semântica sem erros, com anotações de tipo inferido e categoria semântica:
+- `saida_arvore_atribuida.json` — JSON com string pool, `simbolo_id` e anotações semânticas
+- `saida_arvore_atribuida.txt` — texto com tipos anotados
+- `saida_arvore_atribuida.md` — Markdown
+- `saida_arvore_atribuida.png` — imagem (nós com tipo anotado aparecem em verde)
 
-_Neste exemplo, CONTADOR é uma variável com o valor 5 armazenado; A e B podem ser números ou `stmt`_
-| Comando | Função | Exemplo | Resultado esperado para o exemplo |
-|----------|----------|----------|----------|
-| (A B ==) | Verificar se o primeiro parâmetro é igual ao segundo | (10 (CONTADOR) ==) | Falso 
-| (A B !=) | Verificar se o primeiro parâmetro é diferente do segundo | (10 (CONTADOR) !=) | Verdadeiro
-| (A B >) | Verificar se o primeiro parâmetro é maior que o segundo | (10 (CONTADOR) >) | Verdadeiro
-| (A B <) | Verificar se o primeiro parâmetro é menor que o segundo | (10 (CONTADOR) <)| Falso
-| (A B >=) | Verificar se o primeiro parâmetro é maior ou igual ao segundo | (5 (CONTADOR) >=) | Verdadeiro
-| (A B <=) | Verificar se o primeiro parâmetro é menor ou igual ao segundo | (5 (CONTADOR) <=) | Verdadeiro
+### Tabela de símbolos
+- `saida_tabela_simbolos.json` — JSON com todas as variáveis, seus tipos, linha de definição e linhas de uso
+- `saida_tabela_simbolos.md` — Markdown formatado
 
-**Estrutura de decisão**
+### Erros semânticos
+- `saida_erros_semanticos.md` — relatório com todos os erros semânticos encontrados (vazio se não houver)
 
-| Comando | Função | Exemplo | Resultado esperado para o exemplo |
-|----------|----------|----------|----------|
-| (stmt stmt IF) | Realizar uma comando (stmt) caso a instrução (stmt) retorne um valor diferente de 0 | ((5 5 ==) (1 2 +) IF) | Será executada o comando (1 2 +)
+### Erros léxicos e sintáticos
+Impressos diretamente no terminal com número de linha e coluna.
 
-**Estrutura de repetição**
+---
 
-| Comando | Função | Exemplo | Resultado esperado para o exemplo |
-|----------|----------|----------|----------|
-| (N stmt FOR) | Repete o comando (stmt) N (número inteiro positivo) vezes | (3 ((1 (CONTADOR) +) CONTADOR) FOR) | Incrementa o contador  3 vezes, com este contendo o valor 8 ao final do loop FOR
+## A linguagem
 
+### Estrutura geral
 
-### Observações
-1. Os arquivos de saída em assembly, tokens e árvore sintática mostrados no repositório são correspondentes ao `teste03.txt`.<br>
-2. Foi usado `|` para divisão real e `/`pra divisão inteira, como especificado no documento da segunda fase.<br>
-3. Em caso de erro léxico, o analisador exibe um aviso mas continua a análise sintática. O assembly só é gerado se não houver nenhum erro.
-4. O terminal exibe os valores esperados de cada linha como referência para validação do assembly. Os cálculos são realizados pelo Assembly no CPulator — o Python serve apenas como simulação de verificação.
+Todo programa deve começar com `(START)` e terminar com `(END)`. As instruções ficam entre eles, uma por linha, sempre entre parênteses, em notação polonesa reversa: `(A B op)`.
+
+### Comentários
+
+Iniciados por `*{` e encerrados por `}*`. Podem aparecer em qualquer posição:
+
+```
+*{ comentário em linha própria }*
+(4 2 +) *{ comentário no final da linha }*
+(3 *{ comentário entre tokens }* 4 *)
+```
+
+### Operadores suportados
+
+| Operador | Símbolo | Exemplo | Restrição de tipos |
+|---|---|---|---|
+| Adição | `+` | `(3 4 +)` | ambos `int` ou ambos `float` |
+| Subtração | `-` | `(5 2 -)` | ambos `int` ou ambos `float` |
+| Multiplicação | `*` | `(3 4 *)` | ambos `int` ou ambos `float` |
+| Divisão real | `\|` | `(10 2 \|)` | ambos `int` ou ambos `float` — resultado sempre `float` |
+| Divisão inteira | `/` | `(9 3 /)` | ambos `int` — resultado `int` |
+| Módulo | `%` | `(10 3 %)` | ambos `int` — resultado `int` |
+| Potenciação | `^` | `(2 3 ^)` | base `int` ou `float`, expoente obrigatoriamente `int` > 0 |
+
+### Operadores relacionais
+
+Produzem resultado do tipo `bool`. Ambos os operandos devem ser do mesmo tipo (`int` ou `float`).
+
+| Operador | Símbolo | Exemplo |
+|---|---|---|
+| Igual | `==` | `(5 5 ==)` |
+| Diferente | `!=` | `(3 4 !=)` |
+| Maior | `>` | `(5 3 >)` |
+| Menor | `<` | `(2 4 <)` |
+| Maior ou igual | `>=` | `(5 5 >=)` |
+| Menor ou igual | `<=` | `(3 5 <=)` |
+
+### Comandos especiais
+
+| Comando | Função | Exemplo |
+|---|---|---|
+| `(V MEM)` | Armazena o valor V na variável MEM | `(10 X)` |
+| `(MEM)` | Lê o valor armazenado em MEM | `(X)` |
+| `(N RES)` | Retorna o resultado de N instruções atrás | `(1 RES)` |
+
+`MEM` pode ser qualquer sequência de letras latinas maiúsculas que não seja uma palavra reservada (`START`, `END`, `IF`, `FOR`, `RES`).
+
+### Estruturas de controle
+
+**Decisão — IF**
+```
+(cond body IF)
+```
+Executa `body` se `cond` for verdadeiro. `cond` deve ser obrigatoriamente uma expressão relacional (tipo `bool`).
+
+Exemplo: `((5 5 ==) (1 2 +) IF)`
+
+**Repetição — FOR**
+```
+(N body FOR)
+```
+Repete `body` exatamente N vezes. N deve ser um número inteiro maior que zero.
+
+Exemplo: `(3 (1 2 +) FOR)`
+
+---
+
+## Sistema de tipos
+
+A linguagem possui tipagem **estática e forte**. O tipo de cada variável é determinado no momento da primeira atribuição e não pode ser alterado.
+
+### Tipos suportados
+
+| Tipo | Origem |
+|---|---|
+| `int` | literal inteiro (`3`, `10`, `-5`) |
+| `float` | literal real (`3.0`, `1.5`, `-2.7`) |
+| `bool` | exclusivamente inferido de operadores relacionais (`==`, `!=`, `<`, `>`, `<=`, `>=`) |
+
+**Não existem literais booleanos na linguagem.** Não há `true` nem `false`. O tipo `bool` só existe como resultado de uma expressão relacional — por isso os arquivos de teste não contêm literais lógicos.
+
+### Regras de compatibilidade
+
+- Operações aritméticas exigem operandos do **mesmo tipo**. `int + float` é erro semântico — não há promoção implícita.
+- Divisão real `|` aceita `int|int` ou `float|float`, mas o resultado é sempre `float`.
+- Divisão inteira `/` e módulo `%` exigem ambos os operandos `int`.
+- Potenciação `^` exige expoente `int` > 0. A base pode ser `int` ou `float`.
+- Operadores relacionais exigem operandos do mesmo tipo (`int` ou `float`). `bool` não pode ser operando relacional.
+
+### Regras de variáveis
+
+- Toda variável deve ser **declarada antes de ser usada**: `(V MEM)` declara e inicializa.
+- O tipo é inferido do valor atribuído na primeira declaração.
+- Reatribuição com **mesmo tipo** é válida.
+- Reatribuição com **tipo diferente** é erro semântico.
+- Armazenar resultado `bool` em variável é erro semântico.
+
+### Regras do RES
+
+- `(N RES)` referencia o resultado de N instruções anteriores (N ≥ 1).
+- IF e FOR não produzem resultado com valor real — se `(N RES)` referenciar um IF/FOR, é erro semântico.
+- `(0 RES)` é erro semântico — referência à instrução corrente, ainda não disponível.
+
+---
+
+## Exemplos
+
+### Programa válido
+
+```
+*{ operacoes aritmeticas e variaveis }*
+(START)
+(4 2 +)
+(3.0 2.0 *)
+(10 A)
+(3.0 B)
+((A) 4 +)
+((B) 1.0 +)
+(1 RES)
+((5 5 ==) (2 3 +) IF)
+(3 (1 2 +) FOR)
+(END)
+```
+
+### Programa com erro semântico — tipo incompatível
+
+```
+(START)
+(3 2.0 +)
+(END)
+```
+Erro: operador `+` requer operandos do mesmo tipo, recebeu `int` e `float`.
+
+### Programa com erro semântico — variável não declarada
+
+```
+(START)
+(NAOEXISTE)
+(END)
+```
+Erro: variável `NAOEXISTE` usada antes de ser definida.
+
+### Programa com erro semântico — condição de IF não é bool
+
+```
+(START)
+((3 5 +) (1 2 +) IF)
+(END)
+```
+Erro: condição do IF deve ser `bool`, recebeu `int`.
+
+### Programa com erro semântico — expoente não inteiro
+
+```
+(START)
+(2 3.0 ^)
+(END)
+```
+Erro: expoente em `^` deve ser `int`, recebeu `float`.
+
+---
+
+## Arquivos de saída
+
+| Arquivo | Conteúdo |
+|---|---|
+| `saida_tokens_2.txt` | tokens reconhecidos pelo léxico em JSON |
+| `saida_arvore_json.txt` | árvore sintática em JSON (com string pool) |
+| `saida_arvore.txt` | árvore sintática em texto |
+| `saida_arvore.md` | árvore sintática em Markdown |
+| `saida_arvore.png` | árvore sintática em imagem |
+| `saida_tabela_simbolos.json` | tabela de símbolos em JSON |
+| `saida_tabela_simbolos.md` | tabela de símbolos em Markdown |
+| `saida_erros_semanticos.md` | relatório de erros semânticos |
+| `saida_arvore_atribuida.json` | árvore atribuída em JSON (com tipos e categorias) |
+| `saida_arvore_atribuida.txt` | árvore atribuída em texto |
+| `saida_arvore_atribuida.md` | árvore atribuída em Markdown |
+| `saida_arvore_atribuida.png` | árvore atribuída em imagem |
+| `saida_assembly.s` | código Assembly para Cpulator-ARMv7 |
+
+**Os artefatos presentes no repositório foram gerados a partir do arquivo `teste03.txt`.**
+
+---
+
+## Observações
+
+1. O tipo `bool` não possui literal na linguagem — ele é exclusivamente o resultado de operadores relacionais. Portanto, não há literais booleanos nos arquivos de teste: isso é correto e esperado.
+2. A linguagem usa tipagem forte sem promoção implícita: `int + float` é sempre erro semântico.
+3. `|` é divisão real (resultado sempre `float`); `/` é divisão inteira (ambos os operandos devem ser `int`).
+4. O analisador continua para as fases seguintes mesmo após encontrar erros, a fim de reportar todos os problemas de uma só vez. O assembly só é gerado quando não há nenhum erro nas três fases.
+5. O terminal exibe os valores esperados de cada linha como referência para validação do assembly. Os cálculos efetivos são realizados pelo assembly no Cpulator — o Python serve apenas como simulação de verificação.

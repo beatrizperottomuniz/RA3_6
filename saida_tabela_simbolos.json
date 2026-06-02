@@ -1,0 +1,17 @@
+{
+    "N": {
+        "tipo": "int",
+        "linha_def": 17,
+        "linhas_uso": [
+            19,
+            26
+        ]
+    },
+    "R": {
+        "tipo": "float",
+        "linha_def": 18,
+        "linhas_uso": [
+            20
+        ]
+    }
+}
