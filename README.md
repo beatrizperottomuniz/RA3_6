@@ -10,6 +10,7 @@
 ## Descrição
 
 Este projeto implementa um analisador semântico capaz de identificar tokens, fazer análise sintática e semântica, e gerar código assembly correspondente.
+
 ---
 
 ## Requisitos
@@ -23,6 +24,12 @@ Matplotlib (para geração das árvores em PNG):
 ```
 pip install matplotlib
 ```
+
+---
+
+## Como compilar 
+Este projeto foi desenvolvido em Python, uma linguagem interpretada, portanto não há etapa de compilação explícita. <br>
+A execução é feita diretamente pelo interpretador Python.<br>
 
 ---
 
