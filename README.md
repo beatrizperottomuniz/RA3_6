@@ -4,6 +4,7 @@
 **Disciplina** : Linguagens Formais e Compiladores (Turma 9º U) - Engenharia de Computação (Noite) - 2026 / 1º Sem <br>
 **Professor** : Frank Coelho de Alcantara<br>
 **Aluna** : Beatriz Perotto Muniz [@beatrizperottomuniz](https://github.com/beatrizperottomuniz)<br>
+**Grupo** : RA3 6 
 
 ---
 
